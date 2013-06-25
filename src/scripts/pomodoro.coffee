@@ -20,14 +20,22 @@
 pomodoros = {}
 defaultLength = 25
 
+format = (date) ->
+  return date.getFullYear() +
+    date.getMonth() +
+    date.getDate()
+
 module.exports = (robot) ->
 
   robot.brain.data.pomodoros ||= 0
 
   check = ->
+    current = new Date()
+    isWeekend = current.getDay() == 0 && current.getDay() == 6
+    isWorktime = current.getHours() > 8 && current.getHours() < 18
     for name, session of pomodoros
       elapsed = new Date().getTime() - session.lastNotification.getTime()
-      if elapsed > 1000 * 60 * defaultLength * 1.5 && !session.started
+      if elapsed > 1000 * 60 * defaultLength * 1.5 && !session.started && !isWeekend && isWorktime
         session.msg.reply "Dude, you should do a pomodoro soon!"
         session.lastNotification = new Date()
 
@@ -46,6 +54,14 @@ module.exports = (robot) ->
     currentPomodoro.func = ->
       msg.reply "Pomodoro completed!"
       currentPomodoro.started = false
+      users = robot.brain.usersForFuzzyName(name)
+      if users.length is 1
+        user = users[0]
+        user.pomodoros = {} if !user.pomodoros
+        count = user.pomodoros[format(currentPomodoro.time)]
+        user.pomodoros[format(currentPomodoro.time)] = current+1 | 1
+        console.log(user)
+
 
     currentPomodoro.time = new Date()
     currentPomodoro.length = defaultLength
