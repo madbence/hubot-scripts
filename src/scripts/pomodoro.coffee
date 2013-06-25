@@ -86,7 +86,10 @@ module.exports = (robot) ->
 
     minutes = Math.round(minutes / 1000 / 60)
 
-    msg.reply "There are still #{minutes} minutes in your pomodoro"
+    if minutes > 1
+      msg.reply "There are still #{minutes} minutes in your pomodoro"
+    else
+      msg.reply "There is still 1 minute in your pomodoro"
 
   robot.respond /stop (p|pom|pomodoro)/i, (msg) ->
     currentPomodoro = pomodoros[msg.envelope.user.name]
