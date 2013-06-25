@@ -42,7 +42,6 @@ module.exports = (robot) ->
   setInterval check, 1000 * 60 * 5
 
   robot.respond /start (p|pom|pomodoro)/i, (msg) ->
-    console.log pomodoros, msg.envelope.user.name
     currentPomodoro = pomodoros[msg.envelope.user.name]
 
     if currentPomodoro?.started
@@ -52,15 +51,15 @@ module.exports = (robot) ->
     currentPomodoro = {}
     
     currentPomodoro.func = ->
-      msg.reply "Pomodoro completed!"
       currentPomodoro.started = false
       users = robot.brain.usersForFuzzyName(msg.envelope.user.name)
       if users.length is 1
         user = users[0]
         user.pomodoros = {} if !user.pomodoros
-        count = user.pomodoros[format(currentPomodoro.time)]
-        user.pomodoros[format(currentPomodoro.time)] = (count + 1) || 1
+        count = user.pomodoros[format(currentPomodoro.time)] || 0
+        user.pomodoros[format(currentPomodoro.time)] = count + 1
         console.log(user)
+        msg.reply "Pomodoro completed! ("+(count+1)+" today)"
 
 
     currentPomodoro.time = new Date()
