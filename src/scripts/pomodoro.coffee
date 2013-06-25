@@ -21,8 +21,8 @@ pomodoros = {}
 defaultLength = 25
 
 format = (date) ->
-  return date.getFullYear() +
-    date.getMonth() +
+  return date.getFullYear() + "-" +
+    date.getMonth() + "-" +
     date.getDate()
 
 module.exports = (robot) ->
