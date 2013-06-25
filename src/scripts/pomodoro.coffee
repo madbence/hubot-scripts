@@ -26,8 +26,8 @@ module.exports = (robot) ->
 
   check = ->
     for name, session of pomodoros
-      console.log(name)
-      if new Date().getTime() - session.lastNotification.getTime() > 1000 * 60 * defaultLength && !session.started
+      elapsed = new Date().getTime() - session.lastNotification.getTime()
+      if elapsed > 1000 * 60 * defaultLength * 1.5 && !session.started
         session.msg.reply "Dude, you should do a pomodoro soon!"
         session.lastNotification = new Date()
 
