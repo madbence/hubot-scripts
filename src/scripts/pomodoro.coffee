@@ -17,37 +17,50 @@
 # Author:
 #   mcollina
 
-currentPomodoro = null
+pomodoros = {}
 defaultLength = 25
 
 module.exports = (robot) ->
 
   robot.brain.data.pomodoros ||= 0
 
-  robot.respond /start pomodoro ?(\d+)?/i, (msg) ->
+  check = ->
+    for name, session of pomodoros
+      console.log(name)
+      if new Date().getTime() - session.time.getTime() > 1000 * defaultLength * 2 && !session.started
+        session.msg.reply "Dude, you should do a pomodoro soon!"
 
-    if currentPomodoro?
-      msg.send "Pomodoro already started"
+  setInterval check, 1000 * 60 * 5
+
+  robot.respond /start (p|pom|pomodoro)/i, (msg) ->
+    console.log pomodoros, msg.envelope.user.name
+    currentPomodoro = pomodoros[msg.envelope.user.name]
+
+    if currentPomodoro?.started
+      msg.reply "Pomodoro already started!"
       return
 
     currentPomodoro = {}
     
     currentPomodoro.func = ->
-      msg.send "Pomodoro completed!"
-      currentPomodoro = null
-      robot.brain.data.pomodoros += 1
+      msg.reply "Pomodoro completed!"
+      currentPomodoro.started = false
 
     currentPomodoro.time = new Date()
     currentPomodoro.length = defaultLength
-    currentPomodoro.length = parseInt(msg.match[1]) if msg.match[1]?
+    currentPomodoro.started = true
+    currentPomodoro.msg = msg
 
-    msg.send "Pomodoro started!"
+    msg.reply "Pomodoro started!"
 
     currentPomodoro.timer = setTimeout(currentPomodoro.func, currentPomodoro.length * 60 * 1000)
+    pomodoros[msg.envelope.user.name] = currentPomodoro
 
-  robot.respond /pomodoro\?/i, (msg) ->
-    unless currentPomodoro?
-      msg.send "You have not started a pomodoro"
+  robot.respond /(p|pom|pomodoro)\?/i, (msg) ->
+    currentPomodoro = pomodoros[msg.envelope.user.name]
+
+    unless currentPomodoro?.started
+      msg.reply "You have not started a pomodoro"
       return
 
     minutes = currentPomodoro.time.getTime() + currentPomodoro.length * 60 * 1000
@@ -55,17 +68,16 @@ module.exports = (robot) ->
 
     minutes = Math.round(minutes / 1000 / 60)
 
-    msg.send "There are still #{minutes} minutes in this pomodoro"
+    msg.reply "There are still #{minutes} minutes in your pomodoro"
 
-  robot.respond /stop pomodoro/i, (msg) ->
-    unless currentPomodoro?
-      msg.send "You have not started a pomodoro"
+  robot.respond /stop (p|pom|pomodoro)/i, (msg) ->
+    currentPomodoro = pomodoros[msg.envelope.user.name]
+
+    unless currentPomodoro?.started
+      msg.reply "You have not started a pomodoro"
       return
 
     clearTimeout(currentPomodoro.timer)
 
-    currentPomodoro = null
-    msg.send "Pomodoro stopped!"
-
-  robot.respond /total pomodoros/i, (msg) ->
-    msg.send "You have completed #{robot.brain.data.pomodoros} pomodoros"
+    currentPomodoro.started = false
+    msg.reply "Pomodoro stopped!"
