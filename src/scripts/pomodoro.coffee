@@ -54,12 +54,12 @@ module.exports = (robot) ->
     currentPomodoro.func = ->
       msg.reply "Pomodoro completed!"
       currentPomodoro.started = false
-      users = robot.brain.usersForFuzzyName(name)
+      users = robot.brain.usersForFuzzyName(msg.envelope.user.name)
       if users.length is 1
         user = users[0]
         user.pomodoros = {} if !user.pomodoros
         count = user.pomodoros[format(currentPomodoro.time)]
-        user.pomodoros[format(currentPomodoro.time)] = current+1 | 1
+        user.pomodoros[format(currentPomodoro.time)] = (count + 1) || 1
         console.log(user)
 
 
