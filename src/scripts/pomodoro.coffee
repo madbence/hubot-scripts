@@ -27,8 +27,9 @@ module.exports = (robot) ->
   check = ->
     for name, session of pomodoros
       console.log(name)
-      if new Date().getTime() - session.time.getTime() > 1000 * 60 * defaultLength * 2 && !session.started
+      if new Date().getTime() - session.lastNotification.getTime() > 1000 * 60 * defaultLength && !session.started
         session.msg.reply "Dude, you should do a pomodoro soon!"
+        session.lastNotification = new Date()
 
   setInterval check, 1000 * 60 * 5
 
@@ -50,6 +51,7 @@ module.exports = (robot) ->
     currentPomodoro.length = defaultLength
     currentPomodoro.started = true
     currentPomodoro.msg = msg
+    currentPomodoro.lastNotification = currentPomodoro.time
 
     msg.reply "Pomodoro started!"
 
