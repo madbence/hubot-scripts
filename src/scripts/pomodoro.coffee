@@ -27,7 +27,7 @@ module.exports = (robot) ->
   check = ->
     for name, session of pomodoros
       console.log(name)
-      if new Date().getTime() - session.time.getTime() > 1000 * defaultLength * 2 && !session.started
+      if new Date().getTime() - session.time.getTime() > 1000 * 60 * defaultLength * 2 && !session.started
         session.msg.reply "Dude, you should do a pomodoro soon!"
 
   setInterval check, 1000 * 60 * 5
